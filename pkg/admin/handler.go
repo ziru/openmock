@@ -1,13 +1,13 @@
 package admin
 
 import (
-	"github.com/checkr/openmock"
-	"github.com/checkr/openmock/swagger_gen/models"
-	"github.com/checkr/openmock/swagger_gen/restapi/operations"
-	"github.com/checkr/openmock/swagger_gen/restapi/operations/evaluate"
-	"github.com/checkr/openmock/swagger_gen/restapi/operations/health"
-	"github.com/checkr/openmock/swagger_gen/restapi/operations/template"
-	"github.com/checkr/openmock/swagger_gen/restapi/operations/template_set"
+	"github.com/ziru/openmock"
+	"github.com/ziru/openmock/swagger_gen/models"
+	"github.com/ziru/openmock/swagger_gen/restapi/operations"
+	"github.com/ziru/openmock/swagger_gen/restapi/operations/evaluate"
+	"github.com/ziru/openmock/swagger_gen/restapi/operations/health"
+	"github.com/ziru/openmock/swagger_gen/restapi/operations/template"
+	"github.com/ziru/openmock/swagger_gen/restapi/operations/template_set"
 	"github.com/go-openapi/runtime/middleware"
 )
 

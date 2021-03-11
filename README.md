@@ -1,13 +1,13 @@
-[<img src="docs/logo.svg">](https://github.com/checkr/openmock)
+[<img src="docs/logo.svg">](https://github.com/ziru/openmock)
 
 <p align="center">
-    <a href="https://goreportcard.com/report/github.com/checkr/openmock" target="_blank">
-        <img src="https://goreportcard.com/badge/github.com/checkr/openmock">
+    <a href="https://goreportcard.com/report/github.com/ziru/openmock" target="_blank">
+        <img src="https://goreportcard.com/badge/github.com/ziru/openmock">
     </a>
-    <a href="https://circleci.com/gh/checkr/openmock" target="_blank">
-        <img src="https://circleci.com/gh/checkr/openmock.svg?style=shield">
+    <a href="https://circleci.com/gh/ziru/openmock" target="_blank">
+        <img src="https://circleci.com/gh/ziru/openmock.svg?style=shield">
     </a>
-    <a href="https://godoc.org/github.com/checkr/openmock" target="_blank">
+    <a href="https://godoc.org/github.com/ziru/openmock" target="_blank">
         <img src="https://img.shields.io/badge/godoc-reference-green.svg">
     </a>
 </p>
@@ -25,7 +25,7 @@ Currently it supports the following channels:
 # Usage
 Use it with docker.
 ```bash
-$ docker run -it -p 9999:9999 -v $(pwd)/demo_templates:/data/templates checkr/openmock 
+$ docker run -it -p 9999:9999 -v $(pwd)/demo_templates:/data/templates ziru/openmock 
 ```
 
 More complete openmock instance (e.g. redis) with docker-compose.
@@ -566,7 +566,7 @@ $ kt consume -topic hello_kafka_out -offsets all=newest:newest
 
 # Advanced pipeline functions
 To enable advanced mocks, for example, your own encoding/decoding of the kafka messages,
-one can develop by directly importing the `github.com/checkr/openmock` package, making a copy of the swagger-generated server main, and passing in a custom OpenMock.
+one can develop by directly importing the `github.com/ziru/openmock` package, making a copy of the swagger-generated server main, and passing in a custom OpenMock.
 
 For example:
 (see [example](https://github.com/sesquipedalian-dev/openmock-custom-example/blob/master/main.go))
@@ -574,9 +574,9 @@ For example:
 package main
 
 import (
-  "github.com/checkr/openmock"
-  "github.com/checkr/openmock/swagger_gen/restapi"
-  "github.com/checkr/openmock/swagger_gen/restapi/operations"
+  "github.com/ziru/openmock"
+  "github.com/ziru/openmock/swagger_gen/restapi"
+  "github.com/ziru/openmock/swagger_gen/restapi/operations"
   /// etc
 )
 
@@ -607,7 +607,7 @@ Please note that OpenMock expects the `payload` or `payload_from_file` for a rep
 form of your `Response` protobuf message.  The request should be in the `Request` protobuf message format
 as it is parsed into json to support `jsonPath` and `gJsonPath` operations.
 
-Example configuration by directly importing the `github.com/checkr/openmock` package into a wrapper project.
+Example configuration by directly importing the `github.com/ziru/openmock` package into a wrapper project.
 ```
 func main() {
   // server set up copy & paste...

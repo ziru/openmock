@@ -3,11 +3,11 @@ GOLANGCILINT := $(shell command -v golangci-lint 2> /dev/null)
 build: build_omctl build_swagger
 
 build_omctl:
-	@GO111MODULE=on go build -o $(PWD)/omctl github.com/checkr/openmock/cmd/omctl
+	@GO111MODULE=on go build -o $(PWD)/omctl github.com/ziru/openmock/cmd/omctl
 
 build_swagger:
 	@echo "Building OpenMock Server to $(PWD)/om-swagger ..."
-	GO111MODULE=on go build -o $(PWD)/om github.com/checkr/openmock/swagger_gen/cmd/open-mock-server
+	GO111MODULE=on go build -o $(PWD)/om github.com/ziru/openmock/swagger_gen/cmd/open-mock-server
 
 test: lint
 	@GO111MODULE=on go test -race -covermode=atomic  . ./pkg/admin ./pkg/evaluator

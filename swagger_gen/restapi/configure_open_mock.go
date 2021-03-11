@@ -12,10 +12,10 @@ import (
 
 	errors "github.com/go-openapi/errors"
 
-	"github.com/checkr/openmock"
-	"github.com/checkr/openmock/pkg/admin"
-	"github.com/checkr/openmock/swagger_gen/restapi/operations"
 	"github.com/sirupsen/logrus"
+	"github.com/ziru/openmock"
+	"github.com/ziru/openmock/pkg/admin"
+	"github.com/ziru/openmock/swagger_gen/restapi/operations"
 
 	"io/ioutil"
 

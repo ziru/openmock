@@ -25,8 +25,8 @@ import (
 	flags "github.com/jessevdk/go-flags"
 	"golang.org/x/net/netutil"
 
-	"github.com/checkr/openmock"
-	"github.com/checkr/openmock/swagger_gen/restapi/operations"
+	"github.com/ziru/openmock"
+	"github.com/ziru/openmock/swagger_gen/restapi/operations"
 )
 
 const (

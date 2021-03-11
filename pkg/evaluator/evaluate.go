@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sort"
 
-	om "github.com/checkr/openmock"
-	models "github.com/checkr/openmock/swagger_gen/models"
+	om "github.com/ziru/openmock"
+	models "github.com/ziru/openmock/swagger_gen/models"
 	"github.com/fatih/structs"
 	"github.com/sirupsen/logrus"
 )

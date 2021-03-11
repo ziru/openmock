@@ -1,4 +1,4 @@
-module github.com/checkr/openmock
+module github.com/ziru/openmock
 
 go 1.15
 
