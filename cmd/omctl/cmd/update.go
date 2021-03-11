@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/checkr/openmock"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/ziru/openmock"
 )
 
 var pushCmd = &cobra.Command{

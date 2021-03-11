@@ -3,8 +3,8 @@ package evaluator
 import (
 	"testing"
 
-	om "github.com/checkr/openmock"
-	"github.com/checkr/openmock/swagger_gen/models"
+	om "github.com/ziru/openmock"
+	"github.com/ziru/openmock/swagger_gen/models"
 	"github.com/stretchr/testify/assert"
 )
 

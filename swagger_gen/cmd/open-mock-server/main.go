@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/checkr/openmock/swagger_gen/restapi"
-	"github.com/checkr/openmock/swagger_gen/restapi/operations"
+	"github.com/ziru/openmock/swagger_gen/restapi"
+	"github.com/ziru/openmock/swagger_gen/restapi/operations"
 	loads "github.com/go-openapi/loads"
 	flags "github.com/jessevdk/go-flags"
 )

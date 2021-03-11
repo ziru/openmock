@@ -3,7 +3,7 @@ jobs:
   unittest:
     docker:
       - image: circleci/golang:1.14
-    working_directory: /go/src/github.com/checkr/openmock
+    working_directory: /go/src/github.com/ziru/openmock
     steps:
       - checkout
       - run: make test

@@ -6,8 +6,8 @@ import (
 
 	"github.com/fatih/structs"
 
-	om "github.com/checkr/openmock"
-	"github.com/checkr/openmock/swagger_gen/models"
+	om "github.com/ziru/openmock"
+	"github.com/ziru/openmock/swagger_gen/models"
 )
 
 var performPublishKafkaAction = func(context *om.Context, mock *om.ActionPublishKafka) (*models.PublishKafkaActionPerformed, error) {

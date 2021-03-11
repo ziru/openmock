@@ -3,9 +3,9 @@ package admin
 import (
 	"testing"
 
-	"github.com/checkr/openmock"
-	model "github.com/checkr/openmock/swagger_gen/models"
 	"github.com/stretchr/testify/assert"
+	"github.com/ziru/openmock"
+	model "github.com/ziru/openmock/swagger_gen/models"
 )
 
 func TestSwaggerToOpenmockMock(t *testing.T) {
