@@ -9,12 +9,13 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (ms MocksArray) DoActions(ctx Context) {
+func (ms MocksArray) DoActions(ctx Context) (conditionMatch bool) {
 	for _, m := range ms {
 		if conditionMatch := m.DoActions(ctx); conditionMatch {
-			return
+			return true
 		}
 	}
+	return false
 }
 
 func (m *Mock) DoActions(ctx Context) (conditionMatch bool) {

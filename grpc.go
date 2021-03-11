@@ -2,6 +2,7 @@ package openmock
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"time"
@@ -147,7 +148,9 @@ func (om *OpenMock) prepareGRPCEcho() *echo.Echo {
 						om:          om,
 					}
 
-					ms.DoActions(c)
+					if !ms.DoActions(c) {
+						return errors.New("no mock matched")
+					}
 					return nil
 				},
 			)

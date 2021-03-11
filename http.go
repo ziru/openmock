@@ -1,6 +1,7 @@
 package openmock
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 
@@ -46,7 +47,9 @@ func (om *OpenMock) startHTTP() {
 						HTTPQueryString: ec.QueryString(),
 						om:              om,
 					}
-					ms.DoActions(c)
+					if !ms.DoActions(c) {
+						return errors.New("no mock matched")
+					}
 					return nil
 				},
 			)
