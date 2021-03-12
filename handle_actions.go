@@ -134,7 +134,7 @@ func (a ActionReplyGRPC) Perform(ctx Context) error {
 		ec.Response().Header().Set(k, v)
 	}
 
-	hdr, data, err := ctx.om.convertJSONToH2Response(ctx, msg)
+	hdr, data, err := ctx.om.convertJSONToH2Response(ec, msg)
 	if err != nil {
 		return err
 	}

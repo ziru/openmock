@@ -14,7 +14,6 @@ require (
 	github.com/antchfx/xpath v0.0.0-20180524052354-077bca4d2caa // indirect
 	github.com/aokoli/goutils v1.0.1 // indirect
 	github.com/bsm/sarama-cluster v2.1.15+incompatible
-	github.com/caarlos0/env v3.3.0+incompatible
 	github.com/caarlos0/env/v6 v6.5.0
 	github.com/eapache/go-resiliency v1.1.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect

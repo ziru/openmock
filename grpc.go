@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -42,20 +43,36 @@ type GRPCRequestResponsePair struct {
 	Response proto.Message
 }
 
-func (om *OpenMock) convertJSONToH2Response(ctx Context, resJSON string) (header []byte, data []byte, err error) {
+func (om *OpenMock) parseServiceMethod(ec echo.Context) (service string, method string) {
+	tokens := strings.Split(ec.Path(), "/")
+	return tokens[1], tokens[2]
+}
+
+func (om *OpenMock) findRegisteredRpcPair(ec echo.Context) (GRPCRequestResponsePair, error) {
+	var result GRPCRequestResponsePair
 	if om.GRPCServiceMap == nil {
-		return nil, nil, fmt.Errorf("empty GRPCServiceMap")
+		return result, fmt.Errorf("empty GRPCServiceMap")
 	}
 
-	if _, ok := om.GRPCServiceMap[ctx.GRPCService]; !ok {
-		return nil, nil, fmt.Errorf("invalid service in GRPCServiceMap. %s", ctx.GRPCService)
+	service, method := om.parseServiceMethod(ec)
+
+	if _, ok := om.GRPCServiceMap[service]; !ok {
+		return result, fmt.Errorf("invalid service in GRPCServiceMap. %s", service)
 	}
 
-	if _, ok := om.GRPCServiceMap[ctx.GRPCService][ctx.GRPCMethod]; !ok {
-		return nil, nil, fmt.Errorf("invalid method in GRPCServiceMap[%s]. %+v", ctx.GRPCService, ctx.GRPCMethod)
+	if _, ok := om.GRPCServiceMap[service][method]; !ok {
+		return result, fmt.Errorf("invalid method in GRPCServiceMap[%s]. %+v", service, method)
 	}
 
-	res := om.GRPCServiceMap[ctx.GRPCService][ctx.GRPCMethod].Response
+	return om.GRPCServiceMap[service][method], nil
+}
+
+func (om *OpenMock) convertJSONToH2Response(ec echo.Context, resJSON string) (header []byte, data []byte, err error) {
+	pair, err := om.findRegisteredRpcPair(ec)
+	if err != nil {
+		return nil, nil, err
+	}
+	res := pair.Response
 	err = protojson.Unmarshal([]byte(resJSON), res)
 	if err != nil {
 		return nil, nil, err
@@ -69,34 +86,17 @@ func (om *OpenMock) convertJSONToH2Response(ctx Context, resJSON string) (header
 	return header, data, nil
 }
 
-// convertRequestBodyToJSON is how we support JSONPath to take values from GRPC requests and include them in responses
-func (om *OpenMock) convertRequestBodyToJSON(h ExpectGRPC, body []byte) (string, error) {
-	if om.GRPCServiceMap == nil {
-		return "", fmt.Errorf("empty GRPCServiceMap")
-	}
-
-	if _, ok := om.GRPCServiceMap[h.Service]; !ok {
-		return "", fmt.Errorf("invalid service in GRPCServiceMap. %s", h.Service)
-	}
-
-	if _, ok := om.GRPCServiceMap[h.Service][h.Method]; !ok {
-		return "", fmt.Errorf("invalid method in GRPCServiceMap[%s]. %+v", h.Service, h.Method)
-	}
-
-	req := om.GRPCServiceMap[h.Service][h.Method].Request
-
-	if len(body) <= grpcSizeLen {
+func (om *OpenMock) convertMsgToJSON(ec echo.Context, msg proto.Message, body []byte) (string, error) {
+	if len(body) < grpcHeaderLen {
 		return "", fmt.Errorf("invalid grpc body length. length: %d", len(body))
 	}
-	// first grpcSizeLen bytes are compression and size information
-	err := proto.Unmarshal(body[(grpcSizeLen+1):], req)
-
+	// first grpcHeaderLen bytes are compression and size information
+	err := proto.Unmarshal(body[grpcHeaderLen:], msg)
 	if err != nil {
 		return "", err
 	}
 
-	jsonRequestMsg, err := protojson.Marshal(req)
-
+	jsonRequestMsg, err := protojson.Marshal(msg)
 	if err != nil {
 		return "", err
 	}
@@ -104,17 +104,45 @@ func (om *OpenMock) convertRequestBodyToJSON(h ExpectGRPC, body []byte) (string,
 	return string(jsonRequestMsg), nil
 }
 
+// convertRequestBodyToJSON is how we support JSONPath to take values from GRPC requests and include them in responses
+func (om *OpenMock) convertRequestBodyToJSON(ec echo.Context, body []byte) (string, error) {
+	pair, err := om.findRegisteredRpcPair(ec)
+	if err != nil {
+		return "", err
+	}
+	return om.convertMsgToJSON(ec, pair.Request, body)
+}
+
+func (om *OpenMock) convertResponseBodyToJSON(ec echo.Context, body []byte) (string, error) {
+	pair, err := om.findRegisteredRpcPair(ec)
+	if err != nil {
+		return "", err
+	}
+	return om.convertMsgToJSON(ec, pair.Response, body)
+}
+
 func (om *OpenMock) prepareGRPCEcho() *echo.Echo {
 	e := echo.New()
 	e.HideBanner = true
 	e.Use(middleware.Logger())
-	e.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+	e.Use(middleware.BodyDump(func(ec echo.Context, reqBody, resBody []byte) {
+		reqBodyStr, reqErr := om.convertRequestBodyToJSON(ec, reqBody)
+		var resBodyStr string
+		var resErr error
+		if ec.Response().Status == 200 {
+			resBodyStr, resErr = om.convertResponseBodyToJSON(ec, resBody)
+		} else {
+			resBodyStr = string(resBody)
+		}
 		logrus.WithFields(logrus.Fields{
-			"grpc_path":   c.Path(),
-			"grpc_method": c.Request().Method,
-			"grpc_host":   c.Request().Host,
-			"grpc_req":    string(reqBody),
-			"grpc_res":    string(resBody),
+			"grpc_path":    ec.Path(),
+			"grpc_method":  ec.Request().Method,
+			"grpc_host":    ec.Request().Host,
+			"grpc_status":  ec.Response().Status,
+			"grpc_req":     reqBodyStr,
+			"grpc_req_err": reqErr,
+			"grpc_res":     resBodyStr,
+			"grpc_res_err": resErr,
 		}).Info()
 	}))
 	if om.CorsEnabled {
@@ -133,9 +161,13 @@ func (om *OpenMock) prepareGRPCEcho() *echo.Echo {
 				fmt.Sprintf("/%s/%s", h.Service, h.Method),
 				func(ec echo.Context) error {
 					body, _ := ioutil.ReadAll(ec.Request().Body)
-					JSONRequestBody, err := om.convertRequestBodyToJSON(h, body)
+					JSONRequestBody, err := om.convertRequestBodyToJSON(ec, body)
 					if err != nil {
-						logrus.WithError(err).Error("failed to convert gRPC request body to JSON")
+						logrus.WithFields(logrus.Fields{
+							"grpc_path":   ec.Path(),
+							"grpc_method": ec.Request().Method,
+							"grpc_host":   ec.Request().Host,
+						}).WithError(err).Error("failed to convert gRPC request body to JSON")
 						return err
 					}
 
