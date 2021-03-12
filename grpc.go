@@ -1,6 +1,7 @@
 package openmock
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -8,12 +9,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gogo/protobuf/jsonpb"
+	"github.com/gogo/protobuf/proto"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/http2"
-	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/proto"
 )
 
 const (
@@ -21,6 +22,14 @@ const (
 	grpcSizeLen    = 4
 	grpcHeaderLen  = grpcPayloadLen + grpcSizeLen
 )
+
+var jsonMarshaler = jsonpb.Marshaler{
+	OrigName:     true,
+	EmitDefaults: true,
+	EnumsAsInts:  false,
+}
+
+var jsonUnmarshaler = jsonpb.Unmarshaler{}
 
 // length-prefixed message, see https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md
 func msgHeader(data []byte) (hdr []byte, payload []byte) {
@@ -73,7 +82,8 @@ func (om *OpenMock) convertJSONToH2Response(ec echo.Context, resJSON string) (he
 		return nil, nil, err
 	}
 	res := pair.Response
-	err = protojson.Unmarshal([]byte(resJSON), res)
+	buf := bytes.NewBufferString(resJSON)
+	err = jsonUnmarshaler.Unmarshal(buf, res)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -96,12 +106,7 @@ func (om *OpenMock) convertMsgToJSON(ec echo.Context, msg proto.Message, body []
 		return "", err
 	}
 
-	jsonRequestMsg, err := protojson.Marshal(msg)
-	if err != nil {
-		return "", err
-	}
-
-	return string(jsonRequestMsg), nil
+	return jsonMarshaler.MarshalToString(msg)
 }
 
 // convertRequestBodyToJSON is how we support JSONPath to take values from GRPC requests and include them in responses
